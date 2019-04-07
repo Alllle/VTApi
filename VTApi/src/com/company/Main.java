@@ -1,4 +1,4 @@
-package com.company;
+package VTApi.src.com.company;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -12,8 +12,10 @@ import java.util.Map;
 public class Main {
     public static void main(String[] args) throws Exception {
         APIHandler apiHandler = new APIHandler();
-        Map<String,String> arguments = new HashMap<>();
-	    apiHandler.newToken("1234");
+        Map<String,String> postReturn = new HashMap<>();
+	    postReturn = apiHandler.newToken("user_id1223");
+        System.out.println(apiHandler.newGet(postReturn.get("access_token")));
+
     }
 
 }
