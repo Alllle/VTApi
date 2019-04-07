@@ -1,6 +1,5 @@
-package VTApi.src.com.company;
+package com.company;
 
-import com.sun.org.apache.xml.internal.serialize.LineSeparator;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -17,21 +16,31 @@ import java.util.Map;
 //Followed this guide: https://developer.vasttrafik.se/portal/#/guides/oauth2
 class APIHandler {
 
+    //Todo: check if the time is expired and refresh.
+    long expiryTime;
+
     APIHandler(){}
 
     //IDK why I have his but i think i might add a check if a token is expired or something..
     HashMap<String, String> newToken(String userID){
+        HashMap<String, String> token = new HashMap<>();
         try {
-            return sendPost(userID);
+            token = sendPost(userID);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+
+        if(token.containsKey("expires_in")){
+            expiryTime = System.currentTimeMillis() + Integer.valueOf(token.get("expires_in"));
+        }else{
+            System.out.println("There is no expiration time?");
+        }
+        return token;
     }
 
     //Todo: Return the get token and figure out what to do with it.
-    public HashMap<String, String> newGet(String token) throws Exception {
-        String url = "https://api.vasttrafik.se/bin/rest.exe/v2/location.name?input=ols&format=json";
+    public HashMap<String, String> newGetRequest(String token, String userID) throws Exception {
+        String url = "https://api.vasttrafik.se/bin/rest.exe/v2/svingeln";
         URL obj = new URL(url);
         HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
@@ -58,7 +67,6 @@ class APIHandler {
     }
 
 
-    //Todo: Make the return into JSON format
     private HashMap<String, String> sendPost(String userID) throws Exception{
         String url = "https://api.vasttrafik.se/token";
         String key = "aIgO0BOwJb8R6hnLmCzTEStacEAa";
@@ -99,9 +107,10 @@ class APIHandler {
         //Remove the unnesessary tokens from the string (", { and })
         text = text.replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\"", "");
         String [] data = text.split(",");
-        /*for (String s: data) {
-            System.out.println(s);
-        }*/
+        for (String s: data) {
+            String temp[] = s.split(":");
+            dict.put(temp[0],temp[1]);
+        }
         return dict;
     }
 }
